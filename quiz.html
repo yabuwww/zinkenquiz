@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人権教育 期末試験対策【完全網羅版】</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 750px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .header {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 1px; }
+        .header p { margin: 8px 0 0; font-size: 0.9rem; opacity: 0.8; }
+
+        .progress-bar { height: 8px; background: #e0e0e0; width: 100%; }
+        .progress-fill { height: 100%; background: #4caf50; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .quiz-area { padding: 30px; flex: 1; display: flex; flex-direction: column; }
+        
+        .question-header { margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; }
+        .badge {
+            display: inline-block;
+            background: #e1f5fe;
+            color: #0277bd;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .q-text { font-size: 1.25rem; font-weight: bold; line-height: 1.6; }
+
+        .options-grid { display: grid; gap: 15px; }
+        .option-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #444;
+            line-height: 1.5;
+            position: relative;
+        }
+        .option-btn:hover { background: #fafafa; border-color: #bdbdbd; transform: translateY(-2px); }
+        .option-btn.correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .option-btn.wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; opacity: 0.6; }
+        .option-btn.disabled { pointer-events: none; }
+
+        /* 解説エリア */
+        .feedback-box {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f1f8e9;
+            border-left: 6px solid #4caf50;
+            animation: slideIn 0.4s ease-out;
+        }
+        .feedback-box.incorrect { background: #fff3e0; border-left-color: #ff9800; }
+        
+        .fb-title { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; display: block; }
+        .fb-body { font-size: 1rem; line-height: 1.7; color: #333; }
+
+        .btn-next {
+            margin-top: 25px;
+            background: #2c5364;
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+        .btn-next:hover { background: #203a43; }
+
+        .result-view { display: none; text-align: center; padding: 50px 30px; }
+        .score-circle {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            background: #f1f8e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin: 0 auto 25px;
+            border: 8px solid #4caf50;
+        }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>人権教育 期末対策ドリル</h1>
+        <p>記述試験のための文脈理解 (全36問)</p>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="bar"></div></div>
+
+    <div class="quiz-area" id="quizView">
+        <div class="question-header">
+            <span class="badge" id="qBadge">Part 1</span>
+            <div class="q-text" id="qText">読み込み中...</div>
+        </div>
+        <div class="options-grid" id="optContainer"></div>
+
+        <div class="feedback-box" id="feedbackArea">
+            <span class="fb-title" id="fbTitle"></span>
+            <div class="fb-body" id="fbText"></div>
+        </div>
+
+        <button class="btn-next" id="btnNext" onclick="nextQ()">次の問題へ</button>
+    </div>
+
+    <div class="result-view" id="resultView">
+        <h2>全問終了！</h2>
+        <p>正解数</p>
+        <div class="score-circle"><span id="score">0</span></div>
+        <p style="font-size:1.1rem; line-height:1.6;" id="resultMsg"></p>
+        <button class="btn-next" onclick="location.reload()" style="display:block;">最初から復習する</button>
+    </div>
+</div>
+
+<script>
+const quizData = [
+    // --- 第1部：人権の基礎概念 ---
+    {
+        part: "第1部：人権の基礎",
+        q: "講義において、「人権を持っている（have）」という表現の弊害と、その対案となる「全体性」の定義は？",
+        opts: [
+            "受動的すぎるため、自ら行使する「能動的権利」と捉えるべき。",
+            "所有物のように切り離せる印象を与えるため、切り離せない「人格そのもの（全体性）」と捉えるべき。",
+            "個人主義的すぎるため、集団の中での「役割」とセットで捉えるべき。",
+            "抽象的すぎるため、憲法で保障された具体的な条文として暗記すべき。"
+        ],
+        ans: 1,
+        exp: "「所有から存在へ」。人権は財産のように売り渡せるものではなく、矛盾も含めたその人の「全体性（Totality）」そのものです。「空気を読む」ことと「自分らしさ」は対立します。"
+    },
+    {
+        part: "第1部：人権の基礎",
+        q: "「なぜ人を殺してはいけないのか」という問いに対する、本講義のスタンスは？",
+        opts: [
+            "法律で決まっているから、と即答すべきである。",
+            "他人に迷惑をかけてはいけないから、と道徳的に説くべきである。",
+            "理由は説明できなくても、「殺されてよい人はいない」という地点に立ち返るべきである。",
+            "自分も殺されたくないだろう、と共感に訴えるべきである。"
+        ],
+        ans: 2,
+        exp: "理由が説明できないからといって、殺してよいことにはなりません。論理のすり替えに注意し、人権の原点（殺されてよい人はいない）に立つことが重要です。"
+    },
+    {
+        part: "第1部：人権の基礎",
+        q: "参政権の本質とされる「意見表明権」の説明として、講義で用いられた例えは？",
+        opts: [
+            "赤ちゃんに選挙権はないが、泣くことで訴える意見表明権はある。",
+            "学生に選挙権はないが、校則を変えるために署名する権利はある。",
+            "納税額に関わらず、一人一票の投票権を持つことが平等の証である。",
+            "外国人には参政権はないが、デモに参加する自由は認められている。"
+        ],
+        ans: 0,
+        exp: "どんなに無力に見える存在（赤ちゃん）でも、自分の状態を訴える権利（意見表明権）は手放してはいけない、という文脈で語られました。"
+    },
+    {
+        part: "第1部：人権の基礎",
+        q: "「パターナリズム（温情主義）」に対する「権利（社会権）」の立場の説明として正しいものは？",
+        opts: [
+            "守ってもらう代わりに、支援者の指導に従い、感謝を示すべきである。",
+            "守られることは「恩恵」ではなく「権利」であり、支援されていても批判や意見表明をしてよい。",
+            "国に頼らず経済的に自立して初めて、一人前の権利が認められる。",
+            "権利を主張する前に、まずは勤労や納税の義務を果たすべきである。"
+        ],
+        ans: 1,
+        exp: "「守ってやるから文句を言うな」がパターナリズム。対して「守られないでよい人はいない」とし、守られながら対等に意見を言うのが人権の基本です。"
+    },
+    {
+        part: "第1部：人権の基礎",
+        q: "本講義における「自立（Independence）」の再定義として正しいものは？",
+        opts: [
+            "誰にも迷惑をかけず、経済的・精神的に一人で生きること。",
+            "依存先を特定の数人に絞り、深い信頼関係を築くこと。",
+            "依存先を無数に増やし、特定の相手への依存度を下げること。",
+            "国の支援を受けずに、自助努力で生活を成り立たせること。"
+        ],
+        ans: 2,
+        exp: "「迷惑をかけてはいけない」という考えは優生思想につながりかねません。自立とは「依存しないこと」ではなく「依存先を増やすこと」です。"
+    },
+
+    // --- 第2部：多様性とジェンダー ---
+    {
+        part: "第2部：多様性",
+        q: "「SOGI（ソジ）」という概念を授業で取り上げる意義として、最も適切なものは？",
+        opts: [
+            "LGBTの人々を保護すべき対象として、特別に配慮するため。",
+            "マジョリティもグラデーションの一部であり、全員が当事者であると気づくため。",
+            "最新の国際的な用語を覚え、知識をアップデートするため。",
+            "性的指向は個人の趣味の問題であり、公の場で話すことではないと教えるため。"
+        ],
+        ans: 1,
+        exp: "LGBTは「特定の人」を指しますが、SOGIは「すべての人」の属性です。「自分は関係ない」というマジョリティの意識を変えるために重要です。"
+    },
+    {
+        part: "第2部：多様性",
+        q: "学校における「隠れたカリキュラム」の具体例として、講義で批判的に挙げられたものは？",
+        opts: [
+            "道徳の授業で行われる形式的な人権教育。",
+            "放課後の部活動における先輩後輩の上下関係。",
+            "男女別名簿や「男は力仕事」といった役割分担。",
+            "先生が生徒に対して行う体罰や暴言。"
+        ],
+        ans: 2,
+        exp: "教科書の内容ではなく、学校の「制度」や「環境」が、無意識のうちにジェンダー・バイアスを刷り込んでいることを指します。"
+    },
+    {
+        part: "第2部：多様性",
+        q: "「ジェンダー・フリー」の正しい定義は？",
+        opts: [
+            "男らしさ・女らしさという性差を完全になくし、中性化すること。",
+            "男女の区別を一切なくし、トイレや更衣室も共用にすること。",
+            "性差があるかないかではなく、性差によるバイアス（偏見）から自由になること。",
+            "女性の権利を男性よりも優先し、過去の差別を清算すること。"
+        ],
+        ans: 2,
+        exp: "性差をなくすことではありません。「違いはあるかもしれないが、それを強調すべき場面か？」と問い直す姿勢のことです。"
+    },
+    {
+        part: "第2部：多様性",
+        q: "障害者権利条約における「合理的配慮」の実施において、最も重要な条件は？",
+        opts: [
+            "予算の範囲内で、可能な限り多くの設備を導入すること。",
+            "支援者が専門的知見に基づき、最善の方法を決定すること。",
+            "配慮の内容について、必ず本人の意向（決定権）を確認すること。",
+            "マジョリティと同じ条件で競争できるよう、特別扱いをしないこと。"
+        ],
+        ans: 2,
+        exp: "支援者が勝手に「よかれと思って」決めるのはパターナリズムです。本人の「最善の利益」を決めるのは本人です。"
+    },
+    {
+        part: "第2部：多様性",
+        q: "女性専用車両などの「積極的差別是正措置（ポジティブ・アクション）」を正当化するロジックは？",
+        opts: [
+            "女性は男性よりも弱い存在だから、優遇して守るべきだ。",
+            "男性への逆差別になるが、少子化対策のために必要だ。",
+            "過去の構造的な不平等を是正し、公平なスタートラインに戻すためのやむを得ない措置だ。",
+            "女性客を増やしたい鉄道会社の商業的なサービスだ。"
+        ],
+        ans: 2,
+        exp: "これは「逆差別」ではなく、マイナスをゼロに戻すための「公正（Equity）」な措置として位置づけられます。"
+    },
+
+    // --- 第3部：マイノリティ ---
+    {
+        part: "第3部：マイノリティ",
+        q: "植民地主義から続く在日朝鮮人への「二重の構造（ダブルスタンダード）」とは？",
+        opts: [
+            "「日本人と同じになれ（同化）」と迫りつつ、「日本人とは違う（差別）」として権利を奪うこと。",
+            "表向きは友好を謳いながら、裏ではスパイとして監視すること。",
+            "教育では平等に扱うが、就職では差別するという社会の矛盾。",
+            "特別永住者には権利を与えるが、一般永住者には与えないという格差。"
+        ],
+        ans: 0,
+        exp: "義務においては日本人扱い（同化）し、権利においては外国人扱い（排除）するという、支配側に都合のよい使い分けです。"
+    },
+    {
+        part: "第3部：マイノリティ",
+        q: "民主主義における「参政権」の範囲について、講義で提示された考え方は？",
+        opts: [
+            "国籍を持つ国民だけが、国の運命を決定する権利を持つべきだ。",
+            "「自分たちのことは自分たちで決める」ため、問題の影響を受ける当事者（住民）も含むべきだ。",
+            "納税額に応じて、発言権の大きさを調整すべきだ。",
+            "外国人に参政権を与えると国が乗っ取られるため、慎重であるべきだ。"
+        ],
+        ans: 1,
+        exp: "地域のゴミ問題などは国籍関係なく「自分たち」の問題です。民主主義の正当性は「当事者性」にあります。"
+    },
+    {
+        part: "第3部：マイノリティ",
+        q: "「権利が欲しければ帰化すればいい」という主張に対し、講義で提示された反論は？",
+        opts: [
+            "帰化の手続きが複雑すぎるため、簡素化すべきだ。",
+            "帰化しても差別はなくならないため、意味がない。",
+            "独自のルーツ（国籍）を持ったままでも尊重される社会を作るべきだ。",
+            "帰化は個人の自由であり、他人が口出しすべきではない。"
+        ],
+        ans: 2,
+        exp: "「日本人になれば認めてやる（同化）」という発想自体が、マジョリティの傲慢であると批判されました。"
+    },
+
+    // --- 第4部：暴力のメカニズム ---
+    {
+        part: "第4部：暴力の構造",
+        q: "いじめや差別の発生メカニズムとして説明された「GOサイン」とは？",
+        opts: [
+            "加害者の個人的なストレスが限界を超えて爆発すること。",
+            "被害者に落ち度があり、それがきっかけでいじめが始まること。",
+            "集団や社会が「こいつは攻撃してもよい」と容認・承認する空気のこと。",
+            "学校や警察がいじめを認知し、指導を開始する合図のこと。"
+        ],
+        ans: 2,
+        exp: "いじめは個人の好悪ではなく、集団の力学（GOサインの共有）によって起きます。これを見抜くのが教育の目的です。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "加害者が責任を逃れるために使う「すり替え（Substitution）」の論理とは？",
+        opts: [
+            "「自分はやっていない」と事実を真っ向から否定すること。",
+            "「そんな場所に行ったのが悪い」「服装が悪い」と、論点を被害者の落ち度へずらすこと。",
+            "「自分も昔いじめられた被害者だ」と同情を誘うこと。",
+            "「社会が悪かった」と責任を転嫁すること。"
+        ],
+        ans: 1,
+        exp: "親身な「アドバイス（処世術）」を装って行われることが多く、被害者に「自分が悪い」と内面化させ、加害を免罪します。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "「処世術（行かない方が無難）」と「被害者非難（行ったお前が悪い）」の違いについて、正しい記述は？",
+        opts: [
+            "両者は同じ意味であり、被害者の安全のためにはどちらも必要である。",
+            "前者は生活の知恵だが、後者は暴力の責任を被害者に転嫁する「すり替え」である。",
+            "前者は加害者の言い分であり、後者は教育的な指導である。",
+            "どちらも被害者の自由を制限するため、言ってはいけない。"
+        ],
+        ans: 1,
+        exp: "被害者に落ち度があったとしても、加害してよい理由にはなりません。この二つを混同すると「すり替え」に加担することになります。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "DV（親密な関係における暴力）の定義として正しいものは？",
+        opts: [
+            "同居している夫婦間で発生する身体的な暴力のこと。",
+            "法的な婚姻関係にある男女間で起こる暴力のこと。",
+            "恋人（デートDV）や友人など、親密な関係全般で起こる支配・被支配のこと。",
+            "男性が加害者、女性が被害者となる暴力のこと。"
+        ],
+        ans: 2,
+        exp: "関係性（親密さ）を利用した支配であり、身体的暴力だけでなく、無視や束縛などの精神的暴力も含まれます。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "DVのサイクルにおいて、被害者が逃げられなくなる最大の要因とされる「ハネムーン期」とは？",
+        opts: [
+            "暴力を振るった後、加害者が急に優しくなり謝罪する時期。",
+            "結婚直後の幸せな時期で、まだ暴力が始まっていない時期。",
+            "被害者が暴力を諦めて受け入れてしまう時期。",
+            "周囲の人々が二人の関係を祝福し、介入しにくくなる時期。"
+        ],
+        ans: 0,
+        exp: "この時期があるため、被害者は「本当はいい人だ」「私が支えなきゃ」と信じ込まされ、共依存から抜け出せなくなります。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "DVにおける「グレーゾーン」の恐ろしさとは？",
+        opts: [
+            "法的に暴力と認定されるかどうかの境界線が曖昧であること。",
+            "関係が「白（安全）」から徐々に「黒（暴力）」へ移行するため、渦中の本人は気づきにくいこと。",
+            "加害者が善意でやっているのか悪意なのか判断がつかないこと。",
+            "周囲の人間が、二人の関係に介入すべきか迷ってしまうこと。"
+        ],
+        ans: 1,
+        exp: "「茹でガエル」のように、気づいた時には支配が完成しているのがDVの特徴です。距離を置く（第三者の介入）ことで初めて「黒」だと認識できます。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "アキレ・ムベンベの「ネクロパワー」が意味する、究極の支配の形とは？",
+        opts: [
+            "経済的に相手を支配し、生殺与奪の権を握ること。",
+            "被害者に「生きたい」と思わせず、「自ら死を選びたい」と思わせるほど追い込む力。",
+            "武力によって敵を殲滅し、死体を管理する権力。",
+            "ゾンビのように思考停止させ、命令に従わせる力。"
+        ],
+        ans: 1,
+        exp: "沖縄戦の「集団自決」などが典型例です。殺すだけでなく、「死を望ませる」という究極の支配です。"
+    },
+    {
+        part: "第4部：暴力の構造",
+        q: "対等な人間関係のイメージとして、伊田広行氏が提唱した「シングル単位感覚」とは？",
+        opts: [
+            "一生独身でいる覚悟を持ち、誰にも頼らず生きること。",
+            "カップルを一心同体と見なさず、それぞれが別の車を運転して並走する感覚。",
+            "パートナーを自分の体の一部のように大切にすること。",
+            "常に一人単位で行動し、相手に干渉しないこと。"
+        ],
+        ans: 1,
+        exp: "「二人は一心同体」という感覚は、相手を所有物とみなすDVにつながりやすい。自立した個として尊重し合うイメージです。"
+    },
+
+    // --- 第5部：戦争責任と回復 ---
+    {
+        part: "第5部：戦争責任",
+        q: "戦争における「国家」と「国民」の関係について、講義で指摘された「ズレ」とは？",
+        opts: [
+            "国家は平和を望んでも、国民が熱狂して戦争を求めてしまうこと。",
+            "軍隊は「国家（国体）」を守る組織であり、必ずしも「国民」を守るとは限らないこと。",
+            "前線の兵士と、安全な場所にいる上層部との意識のズレ。",
+            "戦時中の教育と、現在の平和教育との価値観のズレ。"
+        ],
+        ans: 1,
+        exp: "「軍隊がいれば国民を守れる」というのは幻想であり、沖縄戦では軍が住民を犠牲にした事実（ズレ）があります。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "憲法9条の意義を、一国平和主義を超えた国際的な文脈でどう表現したか？",
+        opts: [
+            "日本だけが孤立しても、崇高な理想を掲げ続ける灯台。",
+            "他国からの侵略を絶対に許さないという強い決意の表明。",
+            "国際社会全体で「いっせーのーせ」で軍縮するための「呼吸（申し合わせ）」。",
+            "アメリカの核の傘の下で、経済発展に専念するための戦略。"
+        ],
+        ans: 2,
+        exp: "自分だけ武器を置くのではなく、相手も武器を置きやすくする呼び水（呼吸）としての能動的な役割です。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "戦後世代の「応答責任（Responsibility）」について、法的な「罪責（Guilt）」との違いは？",
+        opts: [
+            "罪責はないが、先祖の罪を連帯して償う道義的義務がある。",
+            "罪責はないが、過去の歴史や他者からの呼びかけに「応答する」責任はある。",
+            "罪責はあるが、時効が成立しているため処罰はされない。",
+            "罪責も責任もなく、過去にとらわれず未来だけを見るべきである。"
+        ],
+        ans: 1,
+        exp: "「身に覚えがない（罪はない）」という反発は正しい。しかし、「日本人、それでいいのか」という現在の問いに応える責任（能力）はあります。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "応答責任を果たすことのポジティブな意味として、講義で強調された言葉は？",
+        opts: [
+            "罪滅ぼし。",
+            "義務の履行。",
+            "歓び（よろこび）。",
+            "自己犠牲。"
+        ],
+        ans: 2,
+        exp: "責任を果たすことは、孤立から抜け出し、断絶していた他者とつながり、新しい関係を作る「歓び」であるとされました。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "酒井直樹が指摘した、戦後世代が抱く「居心地の悪さ（嫌疑）」への対処法は？",
+        opts: [
+            "「自分は関係ない」と無視し、気にしないようにする。",
+            "不当な言いがかりだと反論し、日本人の名誉を守る。",
+            "疑われて当然の歴史があることを認め、「自分は違う」と証明（応答）し続ける。",
+            "日本人であることを隠し、個人として振る舞う。"
+        ],
+        ans: 2,
+        exp: "「日本人」というカテゴリーが侵略した事実がある以上、疑われるのは歴史的必然。そこから逃げずに応答することが責任です。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "「不処罰の連鎖」とはどのような構造を指すか？",
+        opts: [
+            "犯罪者が刑務所から出た後、再び犯罪を繰り返してしまうこと。",
+            "性暴力などの加害者が適切に処罰されないことが、次の暴力への「GOサイン」になること。",
+            "一つの国で戦争が始まると、周辺国にも戦争が波及すること。",
+            "親から虐待を受けた子が、自分の子にも虐待をしてしまうこと。"
+        ],
+        ans: 1,
+        exp: "過去の暴力をうやむやにすることは、未来の加害者に対して「やっても大丈夫だ」という許可を与えることになります。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "2000年の「女性国際戦犯法廷」が果たした歴史的意義とは？",
+        opts: [
+            "昭和天皇を有罪とし、民衆の手で「不処罰の連鎖」を断ち切る意思を示したこと。",
+            "日本政府に賠償金を支払わせ、被害者の経済的救済を実現したこと。",
+            "加害兵士を特定し、刑事裁判にかけることで厳罰に処したこと。",
+            "国際社会に対して日本の過去を隠蔽し、名誉を回復したこと。"
+        ],
+        ans: 0,
+        exp: "法的拘束力はありませんが、国家が裁かないなら民衆が裁くという「GOサインの取り消し」運動でした。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "PTSDからの回復に不可欠な「ナラティブ」とは何か？",
+        opts: [
+            "医師による薬物療法とカウンセリング。",
+            "断片的な記憶を整理し、一貫した「物語」として語り直すこと。",
+            "過去のつらい記憶を完全に忘却すること。",
+            "加害者に対する復讐計画を立てること。"
+        ],
+        ans: 1,
+        exp: "不条理な出来事に言葉（物語）を与え、それを他者に聴いてもらうことで、過去の出来事として統合されていきます。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "「修復的正義（Restorative Justice）」が目指すゴールは？",
+        opts: [
+            "加害者を厳罰に処し、社会から隔離すること。",
+            "金銭的な賠償を行い、損害を補填すること。",
+            "対話を通じて破壊された人間関係を修復し、コミュニティを再生すること。",
+            "第三者が仲裁に入り、喧嘩両成敗で手打ちにすること。"
+        ],
+        ans: 2,
+        exp: "処罰（応報）だけでは解決しません。「安全な場所」と「信頼できる聴き手」の介在による、関係性の回復が目的です。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "歴史的事実（南京虐殺や慰安婦問題）の有無について、判断基準として講義で挙げられたのは？",
+        opts: [
+            "インターネット上の多数派の意見。",
+            "当時の新聞記事や個人の日記。",
+            "裁判所による事実認定（Fact Finding）。",
+            "政治家の発言や国会答弁。"
+        ],
+        ans: 2,
+        exp: "ネットの言説ではなく、司法の場で証拠に基づいて認定された事実（認定された被害数など）を重視すべきとされました。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "「戦後責任」を考える際、家永三郎らが主張した「連帯責任」論が孕む問題点とは？",
+        opts: [
+            "責任の範囲が広すぎて、誰も責任を取らなくなること。",
+            "「日本人としての一体感」を前提とするため、戦後世代の「身に覚えがない」という疑問を封殺してしまうこと。",
+            "被害者への賠償額が膨大になり、国家財政を圧迫すること。",
+            "国際社会からの批判をかわすためだけの、ポーズとしての謝罪になること。"
+        ],
+        ans: 1,
+        exp: "「日本人だから謝れ」という論理は反発を招きます。「罪責」ではなく「応答責任」へ切り替えることで、主体的な関与が可能になります。"
+    },
+    {
+        part: "第5部：戦争責任",
+        q: "被害者に落ち度があったとしても、決して侵害されてはいけないもの。講義の冒頭で「空気を読むこと」とは違うと定義された人権の本質は？",
+        opts: [
+            "協調性。",
+            "生産性。",
+            "全体性 (Totality)。",
+            "遵法精神。"
+        ],
+        ans: 2,
+        exp: "説明できない部分、矛盾した部分も含めた「丸ごとの人間」のこと。これが全講義を貫くテーマです。"
+    }
+];
+
+let currentIdx = 0;
+let score = 0;
+
+const dom = {
+    badge: document.getElementById('qBadge'),
+    text: document.getElementById('qText'),
+    opts: document.getElementById('optContainer'),
+    fb: document.getElementById('feedbackArea'),
+    fbTitle: document.getElementById('fbTitle'),
+    fbText: document.getElementById('fbText'),
+    nextBtn: document.getElementById('btnNext'),
+    quizView: document.getElementById('quizView'),
+    resView: document.getElementById('resultView'),
+    score: document.getElementById('score'),
+    msg: document.getElementById('resultMsg'),
+    bar: document.getElementById('bar')
+};
+
+function init() {
+    showQuestion();
+}
+
+function showQuestion() {
+    const data = quizData[currentIdx];
+    dom.badge.innerText = data.part;
+    dom.text.innerText = data.q;
+    
+    // 選択肢生成
+    dom.opts.innerHTML = "";
+    data.opts.forEach((opt, idx) => {
+        const btn = document.createElement('div');
+        btn.className = "option-btn";
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(idx, btn);
+        dom.opts.appendChild(btn);
+    });
+
+    // リセット
+    dom.fb.style.display = 'none';
+    dom.fb.className = "feedback-box";
+    dom.nextBtn.style.display = 'none';
+    
+    // 進捗バー
+    const progress = (currentIdx / quizData.length) * 100;
+    dom.bar.style.width = `${progress}%`;
+}
+
+function checkAnswer(selectedIndex, clickedBtn) {
+    const data = quizData[currentIdx];
+    const buttons = document.querySelectorAll('.option-btn');
+    
+    // ボタン無効化
+    buttons.forEach(b => b.classList.add('disabled'));
+
+    if (selectedIndex === data.ans) {
+        score++;
+        clickedBtn.classList.add('correct');
+        dom.fbTitle.innerText = "正解！";
+        dom.fbTitle.style.color = "#2e7d32";
+    } else {
+        clickedBtn.classList.add('wrong');
+        buttons[data.ans].classList.add('correct'); // 正解を表示
+        dom.fb.classList.add('incorrect');
+        dom.fbTitle.innerText = "不正解...";
+        dom.fbTitle.style.color = "#c62828";
+    }
+
+    dom.fbText.innerText = data.exp;
+    dom.fb.style.display = 'block';
+    dom.nextBtn.style.display = 'block';
+}
+
+function nextQ() {
+    currentIdx++;
+    if (currentIdx < quizData.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    dom.quizView.style.display = 'none';
+    dom.resView.style.display = 'block';
+    dom.bar.style.width = "100%";
+    dom.score.innerText = score;
+
+    const ratio = score / quizData.length;
+    let message = "";
+    if (ratio >= 0.9) {
+        message = "素晴らしい！授業の文脈を完璧に理解しています。<br>この調子で記述問題も「S評価」間違いなしです。";
+    } else if (ratio >= 0.7) {
+        message = "合格圏内です！<br>間違えた問題の「解説」を読み込んで、<br>記述問題のキーワードとして使えるようにしましょう。";
+    } else {
+        message = "お疲れ様でした。<br>まずは基礎的な用語の定義（正解の選択肢）を<br>しっかり復習してから再挑戦しましょう。";
+    }
+    dom.msg.innerHTML = message;
+}
+
+window.nextQ = nextQ;
+init();
+</script>
+
+</body>
+</html>
